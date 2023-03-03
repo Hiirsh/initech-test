@@ -2,6 +2,8 @@ import { IComment } from "./IComment";
 
 export interface IPosts {
   posts: IPost[]
+  currentPage: number,
+  totalPages: number
 }
 
 export interface IPost {

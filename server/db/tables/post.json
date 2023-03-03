@@ -1,0 +1,28 @@
+[
+  {
+    "id": 1,
+    "title": "Foo",
+    "username": "Bar",
+    "likes": ["Ksenia"],
+    "dislikes": [],
+    "date": "1677780270435"
+  },
+  {
+    "id": 2,
+    "title": "Foo2",
+    "username": "Bar2",
+    "likes": [],
+    "dislikes": [],
+    "date": "1677787562433",
+    "comments": []
+  },
+  {
+    "id": 3,
+    "title": "Foo3",
+    "username": "Bar3",
+    "likes": [],
+    "dislikes": [],
+    "date": "1677787568515",
+    "comments": []
+  }
+]

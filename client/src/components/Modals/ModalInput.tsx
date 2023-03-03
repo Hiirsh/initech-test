@@ -11,12 +11,12 @@ interface IAddEditModal {
   data?: IPost | IComment;
 }
 export const ModalInput = ({ show, setShow, type, data }: IAddEditModal) => {
-  // const initialInput = !data? "": "title" in data? data.title;
   let initialInput: string = "";
-  if (data && "title" in data) {
+  
+  if (type === ModalInputEnum.editPost && data && "title" in data) {
     initialInput = data.title;
   }
-  if (data && "text" in data) {
+  if (type === ModalInputEnum.editComment && data && "text" in data) {
     initialInput = data.text;
   }
 

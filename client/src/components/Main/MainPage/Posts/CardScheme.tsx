@@ -2,15 +2,18 @@ import React, { memo, CSSProperties } from "react";
 import { useTypeSelector } from "../../../../hooks/useTypeSelector";
 import { IPost } from "../../../../interfaces/IPost";
 import { Button, Card } from "react-bootstrap";
-import { Comment } from "./Comment";
 import { DeleteModal } from "../../../Modals/DeleteModal";
 import { ModalInput } from "../../../Modals/ModalInput";
-import { DeleteModalEnum, ModalInputEnum } from "../../../../utils/constants";
+import {
+  DeleteModalEnum,
+  ModalInputEnum,
+} from "../../../../utils/constants";
 import { Like } from "../../../../utils/icons/Like";
 import { DislikeFilled } from "../../../../utils/icons/DislikeFilled";
 import { Dislike } from "../../../../utils/icons/Dislike";
 import { LikeFilled } from "../../../../utils/icons/LikeFilled";
 import { IComment } from "../../../../interfaces/IComment";
+import { timeConvert } from "../../../../utils/timeConvert";
 
 export interface ICardScheme {
   style?: CSSProperties;
@@ -18,9 +21,8 @@ export interface ICardScheme {
   data: IPost | IComment;
 }
 
-export const CardScheme = memo(function CardMemo({
-  data,
-}: ICardScheme) {
+export const CardScheme = memo(function CardMemo({ data }: ICardScheme) {
+  const type = "title" in data ? "post" : "comment";
   const [showDeleteModal, setShowDeleteModal] = React.useState(false);
   const [showEdidModal, setShowEdidModal] = React.useState(false);
   const [showCommentModal, setShowCommentModal] = React.useState(false);
@@ -50,13 +52,16 @@ export const CardScheme = memo(function CardMemo({
         <Card.Header>{data.username}</Card.Header>
         <Card.Body>
           {"title" in data && <Card.Title>{data.title}</Card.Title>}
+          <Card.Subtitle className="text-muted">
+            {timeConvert(+data.date)}
+          </Card.Subtitle>
           {login === data.username && (
             <div>
               <Button className="m-1" onPointerDown={editPostHandler}>
-                Edit post
+                Edit {type}
               </Button>
               <Button className="m-1" onPointerDown={deletePostHandler}>
-                Delete post
+                Delete {type}
               </Button>
             </div>
           )}
@@ -91,14 +96,18 @@ export const CardScheme = memo(function CardMemo({
           </span>
         </Card.Footer>
       </Card>
-      {/* Delete post */}
+      {/* Delete modal */}
       <DeleteModal
-        type={DeleteModalEnum.deletePost}
+        type={
+          type === "post"
+            ? DeleteModalEnum.deletePost
+            : DeleteModalEnum.deleteComment
+        }
         id={data.id}
         show={showDeleteModal}
         setShow={setShowDeleteModal}
       />
-      {/* Edit post */}
+      {/* Edit modal */}
       <ModalInput
         show={showEdidModal}
         setShow={setShowEdidModal}
@@ -107,7 +116,7 @@ export const CardScheme = memo(function CardMemo({
         }
         data={data}
       />
-      {/* Add comment */}
+      {/* Add modal */}
       <ModalInput
         show={showCommentModal}
         setShow={setShowCommentModal}

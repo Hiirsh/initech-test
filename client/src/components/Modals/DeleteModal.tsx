@@ -10,7 +10,7 @@ interface IDeleteModal {
 }
 export const DeleteModal = ({ id, show, setShow, type }: IDeleteModal) => {
   const handleClose = () => setShow(false);
-
+  
   return (
     <Modal show={show} onHide={handleClose} backdrop="static" keyboard={false}>
       <Modal.Header closeButton>

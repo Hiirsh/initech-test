@@ -10,14 +10,17 @@ import { Like } from "../../../../utils/icons/Like";
 import { DislikeFilled } from "../../../../utils/icons/DislikeFilled";
 import { Dislike } from "../../../../utils/icons/Dislike";
 import { LikeFilled } from "../../../../utils/icons/LikeFilled";
-import { CardScheme } from "./CardScheme";
-export interface IPostProps {
+import { IComment } from "../../../../interfaces/IComment";
+
+export interface ICardScheme {
   style?: CSSProperties;
   className?: string;
-  post: IPost;
+  data: IPost | IComment;
 }
 
-export const Post = memo(function PostMemo({ post }: IPostProps) {
+export const CardScheme = memo(function CardMemo({
+  data,
+}: ICardScheme) {
   const [showDeleteModal, setShowDeleteModal] = React.useState(false);
   const [showEdidModal, setShowEdidModal] = React.useState(false);
   const [showCommentModal, setShowCommentModal] = React.useState(false);
@@ -43,11 +46,11 @@ export const Post = memo(function PostMemo({ post }: IPostProps) {
 
   return (
     <>
-      <Card key={post.id} className="mb-2">
-        <Card.Header>{post.username}</Card.Header>
+      <Card key={data.id} className="mb-2">
+        <Card.Header>{data.username}</Card.Header>
         <Card.Body>
-          <Card.Title>{post.title}</Card.Title>
-          {login === post.username && (
+          {"title" in data && <Card.Title>{data.title}</Card.Title>}
+          {login === data.username && (
             <div>
               <Button className="m-1" onPointerDown={editPostHandler}>
                 Edit post
@@ -57,35 +60,41 @@ export const Post = memo(function PostMemo({ post }: IPostProps) {
               </Button>
             </div>
           )}
-          <Card.Text>Author - {post.username}</Card.Text>
-          {!!post.comments.length && (
-            <Button className="m-1" onPointerDown={changeVisionComment}>
-              {isCommentOpened ? "Hide" : "Show"} comments
-            </Button>
-          )}
-          <Button className="m-1" onPointerDown={addComment}>
-            Add comment
-          </Button>
-          {isCommentOpened && (
-            <Card.Footer>
-              {post.comments.map((comment, key) => (
-                <Card.Body key={key}>
-                  <CardScheme data={comment} key={key} />
-                </Card.Body>
-              ))}
-            </Card.Footer>
+          <Card.Text>Author - {data.username}</Card.Text>
+          {"comments" in data && (
+            <>
+              {"comments" in data && !!data.comments.length && (
+                <Button className="m-1" onPointerDown={changeVisionComment}>
+                  {isCommentOpened ? "Hide" : "Show"} comments
+                </Button>
+              )}
+              <Button className="m-1" onPointerDown={addComment}>
+                Add comment
+              </Button>
+              {isCommentOpened && (
+                <Card.Footer>
+                  {data.comments.map((comment, key) => (
+                    <Card.Body key={key}>
+                      <CardScheme data={comment} key={key} />
+                    </Card.Body>
+                  ))}
+                </Card.Footer>
+              )}
+            </>
           )}
         </Card.Body>
         <Card.Footer>
-          {post.likes.includes(login) ? <LikeFilled /> : <Like />}
-          {post.dislikes.includes(login) ? <DislikeFilled /> : <Dislike />}
-          <span className="ms-4">Votes number: {post.likes.length - post.dislikes.length}</span>
+          {data.likes.includes(login) ? <LikeFilled /> : <Like />}
+          {data.dislikes.includes(login) ? <DislikeFilled /> : <Dislike />}
+          <span className="ms-4">
+            Votes number: {data.likes.length - data.dislikes.length}
+          </span>
         </Card.Footer>
       </Card>
       {/* Delete post */}
       <DeleteModal
         type={DeleteModalEnum.deletePost}
-        id={post.id}
+        id={data.id}
         show={showDeleteModal}
         setShow={setShowDeleteModal}
       />
@@ -93,15 +102,17 @@ export const Post = memo(function PostMemo({ post }: IPostProps) {
       <ModalInput
         show={showEdidModal}
         setShow={setShowEdidModal}
-        type={ModalInputEnum.editPost}
-        data={post}
+        type={
+          "title" in data ? ModalInputEnum.editPost : ModalInputEnum.editComment
+        }
+        data={data}
       />
       {/* Add comment */}
       <ModalInput
         show={showCommentModal}
         setShow={setShowCommentModal}
         type={ModalInputEnum.addComment}
-        data={post}
+        data={data}
       />
     </>
   );

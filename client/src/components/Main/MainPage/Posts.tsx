@@ -1,4 +1,5 @@
 import React from "react";
+import { Col, Container, Row } from "react-bootstrap";
 import { useTypeSelector } from "../../../hooks/useTypeSelector";
 import { Post } from "./Posts/Post";
 
@@ -10,9 +11,15 @@ export default function Posts({ getPosts }: Props) {
 
   return (
     <div>
-      {posts.map((post, key) => (
-        <Post post={post} key={key} />
-      ))}
+      <Container>
+        <Row xs={1} md={2} lg={3} className='justify-content-md-center'>
+          {posts.map((post, key) => (
+            <Col key={key}>
+              <Post post={post} key={key} />
+            </Col>
+          ))}
+        </Row>
+      </Container>
     </div>
   );
 }

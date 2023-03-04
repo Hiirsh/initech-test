@@ -42,6 +42,15 @@ export const usePosts = () => {
     [dispatch]
   );
 
+  const replacePost = React.useCallback(
+    (post: IPost): void => {
+      const index = posts.findIndex((p) => p.id === post.id);
+      if (index) posts[index] = post;
+      setPosts(posts);
+    },
+    [posts, setPosts]
+  );
+
   const getPostsByPage = React.useCallback(
     async (currentPage: number): Promise<void> => {
       try {
@@ -74,7 +83,10 @@ export const usePosts = () => {
   );
 
   const createPost = React.useCallback(
-    async function ({ title, username }: ICreatePost): Promise<void> {
+    async function ({
+      title,
+      username,
+    }: ICreatePost): Promise<number | undefined> {
       try {
         const responce = await fetch(`${base_url}/post/`, {
           method: "POST",
@@ -84,16 +96,16 @@ export const usePosts = () => {
           body: JSON.stringify({ title, username }),
         });
         const { result } = await responce.json();
-        if (totalPosts % 9 === 0) {
+        posts.unshift(result);
+        setTotalPosts(totalPosts + 1);
+        if (posts.length > 9) {
           posts.pop();
-          posts.unshift(result);
-          setTotalPosts(totalPosts + 1);
-          setTotalPages(totalPages + 1);
-          setPosts(posts);
-        } else {
-          posts.unshift(result);
-          setPosts(posts);
         }
+        if (totalPosts % 9 === 0) {
+          setTotalPages(totalPages + 1);
+        }
+        setPosts(posts);
+        return result.id;
       } catch (error) {
         console.error(error);
       }
@@ -138,14 +150,15 @@ export const usePosts = () => {
         const data = await responce.json();
         const result = data.result as IPost;
         result.comments = post.comments;
-        const index = posts.findIndex((p) => p.id === post.id);
-        posts[index] = result;
-        setPosts(posts);
+        // const index = posts.findIndex((p) => p.id === post.id);
+        // posts[index] = result;
+        // setPosts(posts);
+        replacePost(result);
       } catch (error) {
         console.error(error);
       }
     },
-    [posts, setPosts]
+    [replacePost]
   );
 
   const deletePost = React.useCallback(
@@ -155,11 +168,31 @@ export const usePosts = () => {
       });
       if (posts.length === 1) getPostsByPage(currentPage - 1);
       else getPostsByPage(currentPage);
+      setTotalPages(totalPages - 1);
     },
-    [getPostsByPage, currentPage, posts]
+    [getPostsByPage, currentPage, posts, setTotalPages, totalPages]
   );
 
-  const uploadPicture = React.useCallback(() => {}, []);
+  const uploadPicture = React.useCallback(
+    async (id: number, picture: File): Promise<void> => {
+      try {
+        const formData = new FormData();
+        formData.append("picture", picture);
+        const responce = await fetch(`${base_url}/post/${id}/picture`, {
+          method: "POST",
+          // headers: {
+          //   "Content-Type": "multipart/form-data",
+          // },
+          body: formData,
+        });
+        const { result } = await responce.json();
+        replacePost(result);
+      } catch (error) {
+        console.error(error);
+      }
+    },
+    [replacePost]
+  );
 
   return {
     setPost,

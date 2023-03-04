@@ -5,10 +5,10 @@ import { useTypeSelector } from "../../../hooks/useTypeSelector";
 
 export const PageNumbers = () => {
   const { getPostsByPage } = usePosts();
-  
+
   const [pageNums, setPageNums] = React.useState<JSX.Element[]>([]);
   const { currentPage, totalPages } = useTypeSelector((state) => state.posts);
-  
+
   const getPosts = React.useCallback(
     async (currentPage: number) => await getPostsByPage(currentPage),
     [getPostsByPage]
@@ -21,7 +21,7 @@ export const PageNumbers = () => {
     [getPosts]
   );
 
-  const getPageByClick = React.useCallback(
+  const handlePageClick = React.useCallback(
     (e: React.PointerEvent<HTMLElement>) =>
       //@ts-ignore
       getPage(+e.target.firstChild.data),
@@ -33,22 +33,22 @@ export const PageNumbers = () => {
     for (let i = 1; i <= totalPages; i++) {
       if (i === currentPage)
         temp.push(
-          <Pagination.Item key={i} active onPointerDown={getPageByClick}>
+          <Pagination.Item key={i} active>
             {i}
           </Pagination.Item>
         );
       else
         temp.push(
-          <Pagination.Item key={i} onPointerDown={getPageByClick}>
+          <Pagination.Item key={i} onPointerDown={handlePageClick}>
             {i}
           </Pagination.Item>
         );
     }
     setPageNums(temp);
-  }, [totalPages, currentPage, getPageByClick]);
+  }, [totalPages, currentPage, handlePageClick]);
 
   React.useEffect(() => {
-    console.log("React.useEffect - PageNumbers")
+    console.log("React.useEffect - PageNumbers");
     setPages();
   }, [setPages]);
 

@@ -48,6 +48,16 @@ export const CardScheme = memo(function CardMemo({ data }: ICardScheme) {
           <Card.Subtitle className="text-muted">
             {timeConvert(+data.date)}
           </Card.Subtitle>
+          {(data as IPost).imageSrc && (
+            <Card.Body className="p-0" >
+              <img
+              className="mw-100"
+                src={`${(data as IPost).imageSrc}`}
+                alt={(data as IPost).title}
+              />
+            </Card.Body>
+          )}
+
           {login === data.username && (
             <div>
               <Button className="m-1" onPointerDown={editHandler}>
@@ -72,19 +82,19 @@ export const CardScheme = memo(function CardMemo({ data }: ICardScheme) {
                 </Button>
               )}
               {isCommentOpened && (
-                <Card.Footer>
+                <Card.Body className="p-0">
                   {data.comments.map((comment, key) => (
                     <Card.Body key={key}>
                       <CardScheme data={comment} key={key} />
                     </Card.Body>
                   ))}
-                </Card.Footer>
+                </Card.Body>
               )}
             </>
           )}
         </Card.Body>
         <Card.Footer>
-          <LikePanel data={data}/>
+          <LikePanel data={data} />
           <span className="ms-4">
             Votes number: {data.likes.length - data.dislikes.length}
           </span>

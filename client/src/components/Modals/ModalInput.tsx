@@ -15,28 +15,57 @@ interface IAddEditModal {
 }
 export const ModalInput = ({ show, setShow, type, data }: IAddEditModal) => {
   const username = useTypeSelector((state) => state.login.login);
-  let initialInput: string = "";
-
+  // let initialInput: string = "";
+  const initialInput = React.useRef("");
   if (type === ModalInputEnum.editPost && data && "title" in data) {
-    initialInput = data.title;
+    initialInput.current = data.title;
   }
   if (type === ModalInputEnum.editComment && data && "text" in data) {
-    initialInput = data.text;
+    initialInput.current = data.text;
   }
   const { updateComment, createComment } = useComments();
-  const { createPost, updatePost } = usePosts();
+  const { createPost, updatePost, uploadPicture } = usePosts();
 
-  const [input, setInput] = React.useState(initialInput);
+  const [input, setInput] = React.useState(initialInput.current);
+  const [selectedFile, setSelectedFile] = React.useState<File|null>(null);
+  const [isFilePicked, setIsFilePicked] = React.useState(false);
 
-  const handleClose = () => {
+  const handleClose = React.useCallback(() => {
     setShow(false);
-    setInput(initialInput);
-  };
+    setInput(initialInput.current);
+  }, [setShow, setInput]);
+
   const handleInput = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     setInput(e.target.value);
   };
+
+  const handlePublish = React.useCallback(async () => {
+    const postId = await createPost({ title: input, username });
+    if (isFilePicked && postId && selectedFile) {
+      uploadPicture(postId, selectedFile);
+    }
+    setInput("");
+    setSelectedFile(null)
+    setShow(false);
+  }, [
+    input,
+    username,
+    isFilePicked,
+    createPost,
+    setInput,
+    setShow,
+    selectedFile,
+    uploadPicture,
+  ]);
+
+  const handleChangePost = React.useCallback(() => {
+    const post = data as IPost;
+    updatePost({ title: input, post });
+    initialInput.current = input;
+    handleClose();
+  }, [data, handleClose, input, updatePost]);
 
   return (
     <Modal show={show} onHide={handleClose} backdrop="static" keyboard={false}>
@@ -60,11 +89,10 @@ export const ModalInput = ({ show, setShow, type, data }: IAddEditModal) => {
         </Form.Group>
         {(type === ModalInputEnum.addPost ||
           type === ModalInputEnum.editPost) && (
-          // <Form.Group className="mt-1">
-          //   <Form.Label>Upload the picture</Form.Label>
-          //   <Form.Control type="file" />
-          // </Form.Group>
-          <FileUpload />
+          <FileUpload
+            setSelectedFile={setSelectedFile}
+            setIsFilePicked={setIsFilePicked}
+          />
         )}
       </Modal.Body>
       <Modal.Footer>
@@ -72,27 +100,12 @@ export const ModalInput = ({ show, setShow, type, data }: IAddEditModal) => {
           Close
         </Button>
         {type === ModalInputEnum.addPost && (
-          <Button
-            variant="primary"
-            onPointerDown={() => {
-              createPost({ title: input, username });
-              setInput("");
-              setShow(false);
-            }}
-          >
+          <Button variant="primary" onPointerDown={handlePublish}>
             Publish
           </Button>
         )}
         {type === ModalInputEnum.editPost && (
-          <Button
-            variant="primary"
-            onPointerDown={() => {
-              const post = data as IPost;
-              updatePost({ title: input, post });
-              initialInput = input;
-              handleClose();
-            }}
-          >
+          <Button variant="primary" onPointerDown={handleChangePost}>
             Change post
           </Button>
         )}

@@ -4,8 +4,7 @@ import { useLogin } from "../hooks/useLogin";
 import { useTypeSelector } from "../hooks/useTypeSelector";
 
 export default function Header() {
-  const isAuth = useTypeSelector((state) => state.login.auth);
-  const login = useTypeSelector((state) => state.login.login);
+  const { auth: isAuth, login } = useTypeSelector((state) => state.login);
   const { setAuth, setLogin } = useLogin();
   const logout = (): void => {
     setAuth(false);
@@ -14,7 +13,7 @@ export default function Header() {
   if (isAuth) {
     return (
       <header>
-        Welcome, {login}{" "}
+        Welcome, {login}
         <Button variant="primary" onPointerDown={logout}>
           Logout
         </Button>

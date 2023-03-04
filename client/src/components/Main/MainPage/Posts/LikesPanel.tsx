@@ -1,61 +1,96 @@
 import React from "react";
-import { useComments } from "../../hooks/useComments";
-import { usePosts } from "../../hooks/usePosts";
-import { useTypeSelector } from "../../hooks/useTypeSelector";
-import { IComment } from "../../interfaces/IComment";
-import { IPost } from "../../interfaces/IPost";
+import { useComments } from "../../../../hooks/useComments";
+import { usePosts } from "../../../../hooks/usePosts";
+import { useTypeSelector } from "../../../../hooks/useTypeSelector";
+import { IComment } from "../../../../interfaces/IComment";
+import { IPost } from "../../../../interfaces/IPost";
 
 interface ILike {
   data: IPost | IComment;
-  type: "like" | "dislike";
 }
-export const Like = ({ data, type }: ILike) => {
+export const LikePanel = ({ data }: ILike) => {
   const element = "title" in data ? "post" : "comment";
 
   const { updatePost } = usePosts();
   const { updateComment } = useComments();
   const { login } = useTypeSelector((state) => state.login);
-  const [isFilled, setIsFilled] = React.useState(
-    type === "like" ? data.likes.includes(login) : data.dislikes.includes(login)
+  const [isLiked, setIsLiked] = React.useState(data.likes.includes(login));
+  const [isDisliked, setIsDisliked] = React.useState(
+    data.dislikes.includes(login)
   );
-  const handleClick = React.useCallback(() => {
-    console.log("Liked!");
-    if (!isFilled && element === "post") {
-      updatePost({ post: data as IPost, like: login });
-      setIsFilled(true);
-    }
-    if (!isFilled && element === "comment") {
-      const { likes, dislikes, text } = data as IComment;
-      likes.push(login);
-      updateComment({ id: data.id, likes, dislikes, text });
-      setIsFilled(true);
-    }
-    if (isFilled && element === "post") {
-      const index = data.likes.findIndex((username) => username === login);
-      data.likes.splice(index, 1);
-      updatePost({ post: data as IPost });
-      setIsFilled(false);
-    }
-    if (isFilled && element === "comment") {
-      const index = data.likes.findIndex((username) => username === login);
-      data.likes.splice(index, 1);
-      const { likes, dislikes, text } = data as IComment;
-      updateComment({ id: data.id, likes, dislikes, text });
-      setIsFilled(false);
-    }
-  }, [updatePost, login, isFilled, data, element, updateComment]);
 
-  if (type === "like")
-    return (
+  const handleClickLike = React.useCallback(() => {
+    if (!isLiked) {
+      if(isDisliked){
+        const index = data.dislikes.findIndex((username) => username === login);
+        data.dislikes.splice(index, 1);
+        setIsDisliked(false)
+      }
+      data.likes.push(login)
+      if (element === "post") {
+        updatePost({ post: data as IPost, like: login });
+      }
+      if (element === "comment") {
+        const { text } = data as IComment;
+        updateComment({ id: data.id, likes: data.likes, dislikes:data.dislikes, text });
+      }
+      setIsLiked(true);
+    }
+    if (isLiked) {
+      const index = data.likes.findIndex((username) => username === login);
+      data.likes.splice(index, 1);
+      if (element === "post") {
+        updatePost({ post: data as IPost });
+      }
+      if (element === "comment") {
+        const { likes, dislikes, text } = data as IComment;
+        updateComment({ id: data.id, likes, dislikes, text });
+      }
+      setIsLiked(false);
+    }
+  }, [data, element, isLiked, login, updateComment, updatePost, isDisliked]);
+  const handleClickDislike = React.useCallback(() => {
+    if (!isDisliked) {
+      if(isLiked){
+        const index = data.likes.findIndex((username) => username === login);
+        data.likes.splice(index, 1);
+        setIsLiked(false)
+      }
+      if (element === "post") {
+        updatePost({ post: data as IPost, dislike: login });
+      }
+      if (element === "comment") {
+        const { likes, dislikes, text } = data as IComment;
+        dislikes.push(login);
+        updateComment({ id: data.id, likes, dislikes, text });
+      }
+      setIsDisliked(true);
+    }
+    if (isDisliked) {
+      const index = data.likes.findIndex((username) => username === login);
+      data.dislikes.splice(index, 1);
+      if (element === "post") {
+        updatePost({ post: data as IPost });
+      }
+      if (element === "comment") {
+        const { likes, dislikes, text } = data as IComment;
+        updateComment({ id: data.id, likes, dislikes, text });
+      }
+      setIsDisliked(false);
+    }
+  }, [data, element, login, updateComment, updatePost, isDisliked, isLiked]);
+
+  return (
+    <>
       <svg
         fill="#000000"
         width="20px"
         height="20px"
         viewBox="0 0 1920 1920"
         xmlns="http://www.w3.org/2000/svg"
-        onPointerDown={handleClick}
+        onPointerDown={handleClickLike}
       >
-        {isFilled ? (
+        {isLiked ? (
           <path
             d="M1863.059 1016.47c0-124.574-101.308-225.882-225.883-225.882H1203.37c-19.651 0-37.044-9.374-47.66-25.863-10.391-16.15-11.86-35.577-3.84-53.196 54.776-121.073 94.87-247.115 119.378-374.513 15.925-83.576-5.873-169.072-60.085-234.578C1157.29 37.384 1078.005 0 993.751 0H846.588v56.47c0 254.457-155.068 473.224-285.063 612.029-72.734 77.477-176.98 122.09-285.967 122.09H56v734.117C56 1742.682 233.318 1920 451.294 1920h960c124.574 0 225.882-101.308 225.882-225.882 0-46.42-14.117-89.676-38.174-125.59 87.869-30.947 151.116-114.862 151.116-213.234 0-46.419-14.118-89.675-38.174-125.59 87.868-30.946 151.115-114.862 151.115-213.233"
             fillRule="evenodd"
@@ -67,11 +102,8 @@ export const Like = ({ data, type }: ILike) => {
           />
         )}
       </svg>
-    );
-  else
-    return (
       <>
-        {isFilled ? (
+        {isDisliked ? (
           <svg
             fill="#000000"
             xmlns="http://www.w3.org/2000/svg"
@@ -80,7 +112,7 @@ export const Like = ({ data, type }: ILike) => {
             viewBox="0 0 52 52"
             enableBackground="new 0 0 52 52"
             xmlSpace="preserve"
-            onPointerDown={handleClick}
+            onPointerDown={handleClickDislike}
           >
             <g>
               <path
@@ -97,7 +129,7 @@ export const Like = ({ data, type }: ILike) => {
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
-            onPointerDown={handleClick}
+            onPointerDown={handleClickDislike}
           >
             <path
               d="M8 14V4M8 14L4 14V4.00002L8 4M8 14L13.1956 20.0615C13.6886 20.6367 14.4642 20.884 15.1992 20.7002L15.2467 20.6883C16.5885 20.3529 17.1929 18.7894 16.4258 17.6387L14 14H18.5604C19.8225 14 20.7691 12.8454 20.5216 11.6078L19.3216 5.60779C19.1346 4.67294 18.3138 4.00002 17.3604 4.00002L8 4"
@@ -109,5 +141,6 @@ export const Like = ({ data, type }: ILike) => {
           </svg>
         )}
       </>
-    );
+    </>
+  );
 };

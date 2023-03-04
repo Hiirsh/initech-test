@@ -1,53 +1,72 @@
-import React, { useCallback } from "react";
+import React from "react";
 import { Pagination } from "react-bootstrap";
+import { usePosts } from "../../../hooks/usePosts";
 import { useTypeSelector } from "../../../hooks/useTypeSelector";
 
-interface IPageNumbers {
-  updatePages: (value: number) => void;
-}
-export const PageNumbers = ({ updatePages }: IPageNumbers) => {
+export const PageNumbers = () => {
+  const { getPostsByPage } = usePosts();
+  
   const [pageNums, setPageNums] = React.useState<JSX.Element[]>([]);
-  const currentPage = useTypeSelector((state) => state.posts.currentPage);
-  const totalPages = useTypeSelector((state) => state.posts.totalPages);
-
-  const getNextPage = useCallback(
-    (e: React.PointerEvent<HTMLElement>) => {
-      //@ts-ignore
-      updatePages(+e.target.firstChild.data);
-    },
-    [updatePages]
+  const { currentPage, totalPages } = useTypeSelector((state) => state.posts);
+  
+  const getPosts = React.useCallback(
+    async (currentPage: number) => await getPostsByPage(currentPage),
+    [getPostsByPage]
   );
 
-  const setPages = useCallback(() => {
+  const getPage = React.useCallback(
+    (page: number) => {
+      getPosts(page);
+    },
+    [getPosts]
+  );
+
+  const getPageByClick = React.useCallback(
+    (e: React.PointerEvent<HTMLElement>) =>
+      //@ts-ignore
+      getPage(+e.target.firstChild.data),
+    [getPage]
+  );
+
+  const setPages = React.useCallback(() => {
     let temp = [];
     for (let i = 1; i <= totalPages; i++) {
       if (i === currentPage)
         temp.push(
-          <Pagination.Item key={i} active onPointerDown={getNextPage}>
+          <Pagination.Item key={i} active onPointerDown={getPageByClick}>
             {i}
           </Pagination.Item>
         );
       else
         temp.push(
-          <Pagination.Item key={i} onPointerDown={getNextPage}>
+          <Pagination.Item key={i} onPointerDown={getPageByClick}>
             {i}
           </Pagination.Item>
         );
     }
     setPageNums(temp);
-  }, [totalPages, currentPage, getNextPage]);
+  }, [totalPages, currentPage, getPageByClick]);
 
   React.useEffect(() => {
+    console.log("React.useEffect - PageNumbers")
     setPages();
   }, [setPages]);
 
   return (
     <Pagination>
-      <Pagination.First />
-      <Pagination.Prev />
+      {currentPage !== 1 && (
+        <>
+          <Pagination.First onPointerDown={() => getPage(1)} />
+          <Pagination.Prev onPointerDown={() => getPage(currentPage - 1)} />
+        </>
+      )}
       {pageNums}
-      <Pagination.Next />
-      <Pagination.Last />
+      {currentPage !== totalPages && (
+        <>
+          <Pagination.Next onPointerDown={() => getPage(currentPage + 1)} />
+          <Pagination.Last onPointerDown={() => getPage(totalPages)} />
+        </>
+      )}
     </Pagination>
   );
 };

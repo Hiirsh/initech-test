@@ -4,16 +4,10 @@ import { IPost } from "../../../../interfaces/IPost";
 import { Button, Card } from "react-bootstrap";
 import { DeleteModal } from "../../../Modals/DeleteModal";
 import { ModalInput } from "../../../Modals/ModalInput";
-import {
-  DeleteModalEnum,
-  ModalInputEnum,
-} from "../../../../utils/constants";
-import { Like } from "../../../../utils/icons/Like";
-import { DislikeFilled } from "../../../../utils/icons/DislikeFilled";
-import { Dislike } from "../../../../utils/icons/Dislike";
-import { LikeFilled } from "../../../../utils/icons/LikeFilled";
+import { DeleteModalEnum, ModalInputEnum } from "../../../../utils/constants";
 import { IComment } from "../../../../interfaces/IComment";
 import { timeConvert } from "../../../../utils/timeConvert";
+import { LikePanel } from "./LikesPanel";
 
 export interface ICardScheme {
   style?: CSSProperties;
@@ -34,22 +28,21 @@ export const CardScheme = memo(function CardMemo({ data }: ICardScheme) {
     setIsCommentOpened(!isCommentOpened);
   }, [isCommentOpened]);
 
-  const addComment = () => {
+  const addCommentHandler = () => {
     setShowCommentModal(true);
   };
 
-  const editPostHandler = () => {
+  const editHandler = () => {
     setShowEdidModal(true);
   };
 
-  const deletePostHandler = () => {
+  const deleteHandler = () => {
     setShowDeleteModal(true);
   };
-
   return (
     <>
       <Card key={data.id} className="mb-2">
-        <Card.Header>{data.username}</Card.Header>
+        <Card.Header>Author - {data.username}</Card.Header>
         <Card.Body>
           {"title" in data && <Card.Title>{data.title}</Card.Title>}
           <Card.Subtitle className="text-muted">
@@ -57,25 +50,27 @@ export const CardScheme = memo(function CardMemo({ data }: ICardScheme) {
           </Card.Subtitle>
           {login === data.username && (
             <div>
-              <Button className="m-1" onPointerDown={editPostHandler}>
+              <Button className="m-1" onPointerDown={editHandler}>
                 Edit {type}
               </Button>
-              <Button className="m-1" onPointerDown={deletePostHandler}>
+              <Button className="m-1" onPointerDown={deleteHandler}>
                 Delete {type}
               </Button>
             </div>
           )}
-          <Card.Text>Author - {data.username}</Card.Text>
+          {"text" in data && <Card.Text>{data.text}</Card.Text>}
+          {type === "post" && (
+            <Button className="m-1" onPointerDown={addCommentHandler}>
+              Add comment
+            </Button>
+          )}
           {"comments" in data && (
             <>
-              {"comments" in data && !!data.comments.length && (
+              {!!data.comments.length && (
                 <Button className="m-1" onPointerDown={changeVisionComment}>
                   {isCommentOpened ? "Hide" : "Show"} comments
                 </Button>
               )}
-              <Button className="m-1" onPointerDown={addComment}>
-                Add comment
-              </Button>
               {isCommentOpened && (
                 <Card.Footer>
                   {data.comments.map((comment, key) => (
@@ -89,13 +84,13 @@ export const CardScheme = memo(function CardMemo({ data }: ICardScheme) {
           )}
         </Card.Body>
         <Card.Footer>
-          {data.likes.includes(login) ? <LikeFilled /> : <Like />}
-          {data.dislikes.includes(login) ? <DislikeFilled /> : <Dislike />}
+          <LikePanel data={data}/>
           <span className="ms-4">
             Votes number: {data.likes.length - data.dislikes.length}
           </span>
         </Card.Footer>
       </Card>
+      {/* ==========================MODAL WINDOWS========================== */}
       {/* Delete modal */}
       <DeleteModal
         type={

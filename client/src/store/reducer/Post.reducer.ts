@@ -4,12 +4,14 @@ const IS: IPosts = {
   posts: [],
   totalPages: 1, 
   currentPage: 1,
+  totalPosts: 0
 };
 
 export enum IPostEnum {
   setPosts = "SET_POSTS",
   setPost = "SET_POST",
   setTotalPages = "SET_TOTAL_PAGES",
+  setTotalPosts = "SET_TOTAL_POSTS",
   setCurrentPage = "SET_CURRENT_PAGE",
 }
 
@@ -26,12 +28,16 @@ interface IPostReducerTotalPages {
   type: IPostEnum.setTotalPages;
   payload: number;
 }
+interface IPostReducerTotalPosts {
+  type: IPostEnum.setTotalPosts;
+  payload: number;
+}
 interface IPostReducerCurrentPage {
   type: IPostEnum.setCurrentPage;
   payload: number;
 }
 
-export type IPostsReducerActionsTypes = IPostReducerPosts | IPostReducerPost | IPostReducerTotalPages | IPostReducerCurrentPage;
+export type IPostsReducerActionsTypes = IPostReducerPosts | IPostReducerPost | IPostReducerTotalPages | IPostReducerCurrentPage | IPostReducerTotalPosts;
 
 export const PostReducer = (
   state = IS,
@@ -46,6 +52,8 @@ export const PostReducer = (
       return {...state, currentPage: action.payload}
     case IPostEnum.setTotalPages:
       return {...state, totalPages: action.payload}
+    case IPostEnum.setTotalPosts:
+      return {...state, totalPosts: action.payload}
     default:
       return state;
   }

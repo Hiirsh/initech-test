@@ -14,3 +14,5 @@ export enum CardEnum {
   comment = "COMMENT",
   post = "POST",
 }
+
+export const postsOnPage = 9

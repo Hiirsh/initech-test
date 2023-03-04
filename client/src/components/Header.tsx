@@ -12,8 +12,8 @@ export default function Header() {
   };
   if (isAuth) {
     return (
-      <header>
-        Welcome, {login}
+      <header className="d-flex justify-content-between align-items-center mb-1">
+        <>Welcome, {login}</>
         <Button variant="primary" onPointerDown={logout}>
           Logout
         </Button>

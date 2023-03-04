@@ -48,12 +48,11 @@ export const PageNumbers = () => {
   }, [totalPages, currentPage, handlePageClick]);
 
   React.useEffect(() => {
-    console.log("React.useEffect - PageNumbers");
     setPages();
-  }, [setPages]);
+  }, [setPages, totalPages]);
 
   return (
-    <Pagination>
+    <Pagination className="m-auto">
       {currentPage !== 1 && (
         <>
           <Pagination.First onPointerDown={() => getPage(1)} />

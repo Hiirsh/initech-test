@@ -2,7 +2,7 @@ import React from "react";
 import { useDispatch } from "react-redux";
 import { ICreatePost, IPost, IUpdatePost } from "../interfaces/IPost";
 import { IPostEnum } from "../store/reducer/Post.reducer";
-import { base_url } from "../utils/constants";
+import { base_url, postsOnPage } from "../utils/constants";
 import { useTypeSelector } from "./useTypeSelector";
 
 export const usePosts = () => {
@@ -98,10 +98,10 @@ export const usePosts = () => {
         const { result } = await responce.json();
         posts.unshift(result);
         setTotalPosts(totalPosts + 1);
-        if (posts.length > 9) {
+        if (posts.length > postsOnPage) {
           posts.pop();
         }
-        if (totalPosts % 9 === 0) {
+        if (totalPosts % postsOnPage === 0) {
           setTotalPages(totalPages + 1);
         }
         setPosts(posts);
@@ -166,11 +166,28 @@ export const usePosts = () => {
       await fetch(`${base_url}/post/${id}`, {
         method: "DELETE",
       });
-      if (posts.length === 1) getPostsByPage(currentPage - 1);
-      else getPostsByPage(currentPage);
-      setTotalPages(totalPages - 1);
+      if (totalPosts === 1) {
+        setCurrentPage(1);
+        setPosts([]);
+      } else if (posts.length === 1) {
+        getPostsByPage(currentPage - 1);
+        setTotalPages(totalPages - 1);
+      } else {
+        getPostsByPage(currentPage);
+        setTotalPosts(totalPosts - 1);
+      }
     },
-    [getPostsByPage, currentPage, posts, setTotalPages, totalPages]
+    [
+      getPostsByPage,
+      currentPage,
+      posts,
+      setTotalPages,
+      totalPosts,
+      setCurrentPage,
+      setPosts,
+      setTotalPosts,
+      totalPages
+    ]
   );
 
   const uploadPicture = React.useCallback(
@@ -180,9 +197,6 @@ export const usePosts = () => {
         formData.append("picture", picture);
         const responce = await fetch(`${base_url}/post/${id}/picture`, {
           method: "POST",
-          // headers: {
-          //   "Content-Type": "multipart/form-data",
-          // },
           body: formData,
         });
         const { result } = await responce.json();

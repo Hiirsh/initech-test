@@ -1,1 +1,1 @@
-[{"id":3,"text":"Some text three","postId":2,"username":"Same user","likes":[],"dislikes":[],"date":"1677789906222"},{"id":4,"text":"foo","postId":2,"username":"Foo2","likes":[],"dislikes":[],"date":"1677937536138"},{"id":5,"text":"comment","postId":3,"username":"Bar","likes":[],"dislikes":[],"date":"1677942491668"},{"id":6,"text":"this is comment","postId":9,"username":"Bar","likes":["Bar"],"dislikes":[],"date":"1677965345144"}]
+[]
